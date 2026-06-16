@@ -19,6 +19,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - devboard-net
 
 
   backend:
@@ -32,6 +34,8 @@ services:
       POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     ports:
       - "8081:8080"
+    networks:
+      - devboard-net
 
 
   frontend:
@@ -43,6 +47,12 @@ services:
 
     ports: 
       - "8080:4173"
+    networks:
+      - devboard-net
 
 volumes:
   pgdata:
+
+networks:
+  devboard-net:
+    driver: bridge
