@@ -1,51 +1,48 @@
-# DevBoard (advanced) — UI + Go backend + Postgres. That's the whole stack.
-#
-#   browser ──▶ frontend (vite preview :4173) ──/api──▶ backend (Go) ──▶ postgres
-#
-# Every configurable value lives in .env — Compose loads it automatically and
-# fills in the ${...} placeholders below. Edit .env, not this file, to change
-# credentials or ports. This way learners can see in one place exactly which
-# variables get injected into the db and the backend.
-#
-# Bring it up:  docker compose up --build
-# Then open:    http://localhost:8080   (FRONTEND_HOST_PORT)
+# docker compose 
 
-services:
+
+services: 
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER : ${POSTGRES_USER}
+      POSTGRES_PASSWORD : ${POSTGRES_PASSWORD}
+      POSTGRES_DB : ${POSTGRES_DB}
+
+    ports:
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
       - ./init/postgres:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
-    ports:
-      - "${POSTGRES_HOST_PORT}:5432"
+
 
   backend:
+    container_name: backend
     build: ./backend
-    environment:
-      PORT: "${BACKEND_PORT}"
-      # Built from the Postgres vars above so the credentials live in one place.
-      POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     depends_on:
       postgres:
         condition: service_healthy
+    environment:
+      PORT: ${BACKEND_PORT}
+      POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     ports:
-      - "${BACKEND_HOST_PORT}:${BACKEND_PORT}"   # host:container — direct curl/debug; the UI uses the gateway
+      - "8081:8080"
+
 
   frontend:
+    #by default container_name should be same as the service name
+    container_name: "frontend" 
     build: ./frontend
     depends_on:
       - backend
-    ports:
-      - "${FRONTEND_HOST_PORT}:4173"   # vite preview serves on 4173 inside the container
+
+    ports: 
+      - "8080:4173"
 
 volumes:
   pgdata:
