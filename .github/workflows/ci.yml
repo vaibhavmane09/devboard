@@ -40,5 +40,7 @@ jobs:
       - name: Docker Build and Push
         uses: docker/build-push-action@v7
         with:
+          context: .
+          file: ./Dockerfile.multistage
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-fe-master:latest
