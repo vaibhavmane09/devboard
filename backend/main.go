@@ -36,11 +36,11 @@ type Task struct {
 }
 
 type Project struct {
-	ID          int     `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	OwnerID     *int    `json:"owner_id"`
-	CreatedAt   string  `json:"created_at"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	OwnerID     *int   `json:"owner_id"`
+	CreatedAt   string `json:"created_at"`
 }
 
 func main() {

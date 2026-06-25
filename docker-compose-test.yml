@@ -1,0 +1,58 @@
+# docker compose 
+
+
+services: 
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER : ${POSTGRES_USER}
+      POSTGRES_PASSWORD : ${POSTGRES_PASSWORD}
+      POSTGRES_DB : ${POSTGRES_DB}
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./init/postgres:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - devboard-net
+
+
+  backend:
+    container_name: backend
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: ${BACKEND_PORT}
+      POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+    ports:
+      - "8081:8080"
+    networks:
+      - devboard-net
+
+
+  frontend:
+    #by default container_name should be same as the service name
+    container_name: "frontend" 
+    build: ./frontend
+    depends_on:
+      - backend
+
+    ports: 
+      - "8080:4173"
+    networks:
+      - devboard-net
+
+volumes:
+  pgdata:
+
+networks:
+  devboard-net:
+    driver: bridge
