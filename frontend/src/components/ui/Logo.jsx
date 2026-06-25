@@ -4,15 +4,17 @@
 export function Logo({ compact = false, iconOnly = false }) {
   const iconSize = compact ? 26 : 36;
   const wordmarkSize = compact ? 15 : 20;
-  const tile = iconSize / 2 - 2;
+  const tile = iconSize / 2 - 2;   // 11 (compact) or 16 (default)
+  const gap = (iconSize - tile * 2) / 3; // spacing between tiles
+
   const inner = (
-    <svg width={iconSize} height={iconSize} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="8" fill="#7F77DD" />
+    <svg width={iconSize} height={iconSize} viewBox={`0 0 ${iconSize} ${iconSize}`} aria-hidden="true">
+      <rect width={iconSize} height={iconSize} rx={iconSize * 0.25} fill="#7F77DD" />
       <g fill="#ffffff">
-        <rect x="6"  y="6"  width="9" height="9" rx="2" fillOpacity="0.95" />
-        <rect x="17" y="6"  width="9" height="9" rx="2" fillOpacity="0.6" />
-        <rect x="6"  y="17" width="9" height="9" rx="2" fillOpacity="0.6" />
-        <rect x="17" y="17" width="9" height="9" rx="2" fillOpacity="0.35" />
+        <rect x={gap}          y={gap}          width={tile} height={tile} rx="2" fillOpacity="0.95" />
+        <rect x={gap*2+tile}   y={gap}          width={tile} height={tile} rx="2" fillOpacity="0.6"  />
+        <rect x={gap}          y={gap*2+tile}   width={tile} height={tile} rx="2" fillOpacity="0.6"  />
+        <rect x={gap*2+tile}   y={gap*2+tile}   width={tile} height={tile} rx="2" fillOpacity="0.35" />
       </g>
     </svg>
   );
