@@ -90,6 +90,7 @@ jobs:
                 push: true
                 tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest
 
+    # it only needs if you want to call a cd post succeed the ci flow
     deploy:
         needs: [frontend,backend]
         uses: ./.github/workflows/cd.yml
