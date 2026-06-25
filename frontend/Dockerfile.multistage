@@ -1,7 +1,6 @@
 # Multistage  docker file for devboard frontend
 # Stage 1 : builder stage
-FROM node:20-alpine AS builder 
-
+FROM node:20-alpine AS build
 
 #directory where code will stay
 WORKDIR /app
@@ -10,37 +9,26 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-
 # copy the code from host to container 
+
 COPY . .
 
 #RUN npm install
 RUN npm run build
 
-
 # ------------ stage 1 completed -----
-# stage 2 : runner stage 
-
-FROM node:20-alpine AS runner 
-
-# RUN as dedicated non-root user for security 
-RUN addgroup -S app && adduser -S -G app app
-
+# Stage 2 — small image that only serves the build (no nginx)
+ 
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy only the build dist & package files
-COPY --from=builder /app/dist ./dist 
-COPY --from=builder /app/package*.json ./
+RUN npm install -g vite@5 && npm cache clean --force
 
+COPY --from=build /app/dist ./dist
 
-#RUN npm install -g vite
-RUN npm ci --omit=dev
-
-# hand ownership to non-root user
-RUN chown -R app:app /app
-USER app
+COPY vite.preview.config.js ./vite.config.js
 
 EXPOSE 4173
 
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4173"]
+CMD ["vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
