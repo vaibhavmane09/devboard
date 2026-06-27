@@ -1,34 +1,16 @@
-# Multistage  docker file for devboard frontend
-# Stage 1 : builder stage
+# Stage 1 — build the app into static files
 FROM node:20-alpine AS build
-
-#directory where code will stay
 WORKDIR /app
-
-# install deps first 
 COPY package*.json ./
-RUN npm ci
-
-# copy the code from host to container 
-
+RUN npm install --legacy-peer-deps
 COPY . .
-
-#RUN npm install
 RUN npm run build
 
-# ------------ stage 1 completed -----
 # Stage 2 — small image that only serves the build (no nginx)
- 
 FROM node:20-alpine
-
 WORKDIR /app
-
 RUN npm install -g vite@5 && npm cache clean --force
-
 COPY --from=build /app/dist ./dist
-
 COPY vite.preview.config.js ./vite.config.js
-
 EXPOSE 4173
-
 CMD ["vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
