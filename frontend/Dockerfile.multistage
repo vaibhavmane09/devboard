@@ -1,34 +1,27 @@
-# Stage 1 — build the app into static files
-FROM dhi.io/node:22-dev AS build
+# Pin a specific Node version (never a floating `latest`).
+FROM node:20-alpine
+
+# Run as a dedicated non-root user, not root.
+RUN addgroup -S app && adduser -S -G app app
 
 WORKDIR /app
 
+# Install deps first for better layer caching (re-runs only when deps change).
 COPY package*.json ./
+RUN npm ci
 
-RUN npm install --legacy-peer-deps
-
+# Copy the source and build the production bundle into /dist.
 COPY . .
-
 RUN npm run build
 
-# Stage 2 — runtime with production dependencies only
-FROM dhi.io/node:22-dev
+# Hand ownership to the non-root user, then drop privileges.
+RUN chown -R app:app /app
+USER app
 
-WORKDIR /app
-
-# Copy only built files from builder
-COPY --from=build /app/dist ./dist
-COPY vite.preview.config.js ./vite.config.js
-
-# Install production dependencies only (vite for preview)
-# Pin vite version to avoid supply chain attacks
-RUN npm install --only=production vite@5.4.11 && \
-    npm cache clean --force && \
-    find /app -type f -name "*.md" -delete && \
-    find /app -type f -name "package-lock.json" -delete
-
+# Vite preview serves the built bundle on this port.
 EXPOSE 4173
 
-# Use exec form for proper signal handling
-ENTRYPOINT ["node", "--no-warnings"]
-CMD ["./node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
+# 0.0.0.0 so the server is reachable from outside the container.
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4173"]
+
+
