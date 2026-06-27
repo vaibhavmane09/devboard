@@ -28,6 +28,7 @@ jobs:
               uses: docker/build-push-action@v7
               with:
                 context: ./frontend
+                file: /Dockerfile.multistage
                 push: true
                 tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
                 
@@ -67,6 +68,7 @@ jobs:
               uses: docker/build-push-action@v7
               with:
                 context: ./backend
+                file: /Dockerfile.multistage
                 push: true
                 tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest
     deploy:
