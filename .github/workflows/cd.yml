@@ -1,6 +1,6 @@
 # Goal : To deploy the built images from the CI steps once the CI workflow is succeedded 
 
-name: CD
+name: CD_sample
 
 on:
     #workflow_run:
