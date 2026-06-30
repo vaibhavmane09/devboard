@@ -18,7 +18,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --only=production vite@5.4.11 && \
+RUN npm install --legacy-peer-deps && \
     npm cache clean --force && \
     find node_modules -type f -name "*.md" -delete
 
